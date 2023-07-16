@@ -1,7 +1,15 @@
 package com.devcourse.global.util;
 
 public class Query {
-    public enum Table { USERS, VOUCHERS }
+    public enum Table {
+        USERS,
+        VOUCHERS
+        ;
+
+        public String toLowerCase() {
+            return this.name().toLowerCase();
+        }
+    }
     private static final String LEFT_BRACKET = "(";
     private static final String RIGHT_BRACKET = ")";
     private static final String COMMA = ",";
@@ -30,7 +38,7 @@ public class Query {
         }
 
         public Builder insertInto(Table table) {
-            query.append(INSERT_INTO).append(table);
+            query.append(INSERT_INTO).append(table.toLowerCase());
             return this;
         }
 
@@ -46,7 +54,7 @@ public class Query {
         }
 
         public Builder update(Table table) {
-            query.append(UPDATE).append(table);
+            query.append(UPDATE).append(table.toLowerCase());
             return this;
         }
 
@@ -62,12 +70,12 @@ public class Query {
         }
 
         public Builder deleteFrom(Table table) {
-            query.append(DELETE).append(table);
+            query.append(DELETE).append(table.toLowerCase());
             return this;
         }
 
         public Builder from(Table table) {
-            query.append(FROM).append(table);
+            query.append(FROM).append(table.toLowerCase());
             return this;
         }
 
