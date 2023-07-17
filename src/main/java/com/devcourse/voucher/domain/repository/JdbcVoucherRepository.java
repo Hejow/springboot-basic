@@ -42,7 +42,7 @@ class JdbcVoucherRepository implements VoucherRepository {
                 .build();
 
         jdbcTemplate.update(sql,
-                voucher.id(),
+                voucher.id().toString(),
                 voucher.discount(),
                 voucher.expireAt(),
                 voucher.type().name(),
