@@ -2,6 +2,7 @@ package com.devcourse.voucher.domain.repository;
 
 import com.devcourse.voucher.domain.Voucher;
 import com.devcourse.voucher.domain.Voucher.Type;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.devcourse.voucher.domain.Voucher.Status.*;
-import static com.devcourse.voucher.domain.Voucher.Type.*;
+import static com.devcourse.voucher.domain.Voucher.Status.USED;
+import static com.devcourse.voucher.domain.Voucher.Type.FIXED;
+import static com.devcourse.voucher.domain.Voucher.Type.PERCENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("dev")
@@ -114,7 +116,7 @@ class JdbcVoucherRepositoryTest {
         voucherRepository.save(voucher);
 
         // when
-        voucherRepository.updateStatus(voucher.id(), USED.name());
+        voucherRepository.updateStatus(voucher.id(), USED);
 
         // then
         Optional<Voucher> optionalVoucher = voucherRepository.findById(voucher.id());
@@ -122,4 +124,63 @@ class JdbcVoucherRepositoryTest {
         assertThat(optionalVoucher.get().isUsed()).isTrue();
     }
 
+    @Nested
+    @DisplayName("바우처 검색 동적 쿼리 테스트")
+    class searchAllByConditionTest {
+        private final LocalDateTime searchDate = LocalDateTime.now();
+
+        @BeforeEach
+        void initVouchers() {
+            int discount = 100;
+            LocalDateTime notSearchDate = LocalDateTime.now();
+
+            voucherRepository.save(new Voucher(discount, searchDate, PERCENT));
+            voucherRepository.save(new Voucher(discount, searchDate, FIXED));
+            voucherRepository.save(new Voucher(discount, notSearchDate, PERCENT));
+            voucherRepository.save(new Voucher(discount, notSearchDate, FIXED));
+        }
+
+        @Test
+        @DisplayName("타입과 만료일로 검색했을 때 결과는 1개만 나와야 한다.")
+        void success_ByTypeAndExpiredAt() {
+            // given
+
+            // when
+            List<Voucher> responses = voucherRepository.findAllByCondition(PERCENT, searchDate);
+
+            // then
+            assertThat(responses).hasSize(1);
+            assertThat(responses.get(0).type()).isEqualTo(PERCENT);
+        }
+
+        @Test
+        @DisplayName("타입으로만 검색했을 때 결과는 2개만 나와야 한다.")
+        void success_ByType() {
+            // given
+
+            // when
+            List<Voucher> responses = voucherRepository.findAllByCondition(PERCENT, null);
+
+            // then
+            assertThat(responses).hasSize(2)
+                    .allMatch(response -> response.type() == PERCENT);
+        }
+
+        @Test
+        @DisplayName("만료일으로만 검색했을 때 결과는 2개만 나와야 한다.")
+        void success_ByExpiredAt() {
+            // given
+
+            // when
+            List<Voucher> responses = voucherRepository.findAllByCondition(null, searchDate);
+
+            // then
+            assertThat(responses).hasSize(2)
+                    .allMatch(response -> isSameDate(response, searchDate));
+        }
+    }
+
+    private boolean isSameDate(Voucher voucher, LocalDateTime target) {
+        return voucher.expireAt().equals(target);
+    }
 }

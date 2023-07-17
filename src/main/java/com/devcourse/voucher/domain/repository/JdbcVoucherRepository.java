@@ -3,13 +3,13 @@ package com.devcourse.voucher.domain.repository;
 import com.devcourse.global.util.Sql;
 import com.devcourse.voucher.domain.Voucher;
 import org.springframework.context.annotation.Profile;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,8 +23,8 @@ class JdbcVoucherRepository implements VoucherRepository {
         UUID id = UUID.fromString(resultSet.getString("id"));
         int discount = Integer.parseInt(resultSet.getString("discount"));
         LocalDateTime expiredAt = resultSet.getTimestamp("expired_at").toLocalDateTime();
-        Voucher.Type type = Enum.valueOf(Voucher.Type.class, resultSet.getString("type"));
-        Voucher.Status status = Enum.valueOf(Voucher.Status.class, resultSet.getString("status"));
+        Voucher.Type type = Voucher.Type.valueOf(resultSet.getString("type"));
+        Voucher.Status status = Voucher.Status.valueOf(resultSet.getString("status"));
         return new Voucher(id, discount, expiredAt, type, status);
     };
 
@@ -62,6 +62,30 @@ class JdbcVoucherRepository implements VoucherRepository {
     }
 
     @Override
+    public List<Voucher> findAllByCondition(Voucher.Type type, LocalDateTime expiredAt) {
+        Sql.FromBuilder sql = Sql.builder()
+                .select("*")
+                .from(VOUCHERS);
+
+        if (type == null && expiredAt == null) {
+            return Collections.emptyList();
+        }
+
+        if (type != null && expiredAt == null) {
+            sql.where("type");
+            return jdbcTemplate.query(sql.build(), voucherMapper, type.name());
+        }
+
+        if (type == null && expiredAt != null) {
+            sql.where("expired_at");
+            return jdbcTemplate.query(sql.build(), voucherMapper, expiredAt);
+        }
+
+        sql.where("type").and("expired_at");
+        return jdbcTemplate.query(sql.build(), voucherMapper, type.name(), expiredAt);
+    }
+
+    @Override
     public Optional<Voucher> findById(UUID id) {
         String sql = Sql.builder()
                 .select("*")
@@ -76,6 +100,17 @@ class JdbcVoucherRepository implements VoucherRepository {
     }
 
     @Override
+    public void updateStatus(UUID id, Voucher.Status status) {
+        String sql = Sql.builder()
+                .update(VOUCHERS)
+                .set("status")
+                .where("id")
+                .build();
+
+        jdbcTemplate.update(sql, status.name(), id.toString());
+    }
+
+    @Override
     public void deleteById(UUID id) {
         String sql = Sql.builder()
                 .deleteFrom(VOUCHERS)
@@ -83,16 +118,5 @@ class JdbcVoucherRepository implements VoucherRepository {
                 .build();
 
         jdbcTemplate.update(sql, id.toString());
-    }
-
-    @Override
-    public void updateStatus(UUID id, String status) {
-        String sql = Sql.builder()
-                .update(VOUCHERS)
-                .set("status")
-                .where("id")
-                .build();
-
-        jdbcTemplate.update(sql, status, id.toString());
     }
 }

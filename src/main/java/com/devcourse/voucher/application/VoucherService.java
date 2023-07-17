@@ -6,6 +6,7 @@ import com.devcourse.voucher.domain.repository.VoucherRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class VoucherService {
         this.voucherRepository = voucherRepository;
     }
 
+    @Transactional
     public void create(CreateVoucherRequest request) {
         validateRequest(request);
         Voucher voucher = new Voucher(request.discount(), request.expiredAt(), request.type());
@@ -33,6 +35,12 @@ public class VoucherService {
 
     public List<String> findAll() {
         return voucherRepository.findAll().stream()
+                .map(Voucher::toText)
+                .toList();
+    }
+
+    public List<String> searchAllByCondition(Voucher.Type type, LocalDateTime expiredAt) {
+        return voucherRepository.findAllByCondition(type, expiredAt).stream()
                 .map(Voucher::toText)
                 .toList();
     }
