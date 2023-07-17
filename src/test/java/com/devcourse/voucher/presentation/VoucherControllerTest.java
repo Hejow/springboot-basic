@@ -1,6 +1,7 @@
 package com.devcourse.voucher.presentation;
 
 import com.devcourse.voucher.application.VoucherService;
+import com.devcourse.voucher.application.dto.CreateVoucherRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +22,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -126,5 +128,22 @@ class VoucherControllerTest {
             // then
             then(voucherService).should(times(1)).searchAllByCondition(any(), any());
         }
+    }
+
+    @Test
+    @DisplayName("생성 요청이 들어오면 201 응답과 함께 서비스가 한번 호출되어야 한다.")
+    void createTest() throws Exception {
+        // given
+        CreateVoucherRequest request = new CreateVoucherRequest(100, LocalDateTime.now(), PERCENT);
+
+        // when
+        mockMvc.perform(post(BASE_URI)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andDo(print());
+
+        // then
+        then(voucherService).should(times(1)).create(any());
     }
 }
