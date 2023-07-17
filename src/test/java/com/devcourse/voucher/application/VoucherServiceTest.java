@@ -2,9 +2,11 @@ package com.devcourse.voucher.application;
 
 import com.devcourse.global.exception.EntityNotFoundException;
 import com.devcourse.voucher.application.dto.CreateVoucherRequest;
+import com.devcourse.voucher.application.dto.GetVoucherResponse;
 import com.devcourse.voucher.domain.Voucher;
 import com.devcourse.voucher.domain.repository.VoucherRepository;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,10 +17,12 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.devcourse.voucher.domain.Voucher.Type.FIXED;
 import static com.devcourse.voucher.domain.Voucher.Type.PERCENT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,5 +124,42 @@ class VoucherServiceTest {
 
         then(voucherRepository).should(times(1)).isNotExistsById(any());
         then(voucherRepository).should(times(0)).deleteById(any());
+    }
+
+    @Nested
+    @DisplayName("아이디로 조회하기 테스트")
+    class findByIdTest {
+        @Test
+        @DisplayName("아아디로 조회한 결과물과 생성한 바우처의 내부값이 일치해야 한다.")
+        void findById_Success_WithSameResult() {
+            // given
+            UUID id = UUID.randomUUID();
+            Voucher voucher = new Voucher(100, LocalDateTime.now(), PERCENT);
+            willReturn(Optional.of(voucher)).given(voucherRepository).findById(any());
+
+            // when
+            GetVoucherResponse response = voucherService.findById(id);
+
+            // then
+            then(voucherRepository).should(times(1)).findById(any());
+            assertThat(response.id()).isEqualTo(voucher.id());
+            assertThat(response.type()).isEqualTo(voucher.type());
+            assertThat(response.status()).isEqualTo(voucher.status());
+        }
+
+        @Test
+        @DisplayName("조회한 결과가 빈 값이라서 EntityNotFoundException을 던진다.")
+        void findById_Fail_ByEmptyVoucher() {
+            // given
+            UUID id = UUID.randomUUID();
+            willReturn(Optional.empty()).given(voucherRepository).findById(any());
+
+            // when, then
+            assertThatExceptionOfType(EntityNotFoundException.class)
+                    .isThrownBy(() -> voucherService.findById(id))
+                    .withMessage("Accessing Not Exist Voucher. ID : " + id);
+
+            then(voucherRepository).should(times(1)).findById(any());
+        }
     }
 }

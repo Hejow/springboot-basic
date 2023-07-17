@@ -2,6 +2,7 @@ package com.devcourse.voucher.presentation;
 
 import com.devcourse.voucher.application.VoucherService;
 import com.devcourse.voucher.application.dto.CreateVoucherRequest;
+import com.devcourse.voucher.application.dto.GetVoucherResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +47,7 @@ class VoucherControllerTest {
     @DisplayName("전체 조회를 요청하면 200 상태와 함께 예상한 값을 받고 서비스가 한번 호출된다.")
     void findAllTest() throws Exception {
         // given
-        List<String> responses = List.of();
+        List<GetVoucherResponse> responses = List.of();
         given(voucherService.findAll()).willReturn(responses);
 
         // when
@@ -72,7 +73,7 @@ class VoucherControllerTest {
             // given
             LocalDateTime now = LocalDateTime.now();
 
-            List<String> responses = List.of();
+            List<GetVoucherResponse> responses = List.of();
             given(voucherService.searchAllByCondition(any(), any())).willReturn(responses);
 
             // when
@@ -93,7 +94,7 @@ class VoucherControllerTest {
         @DisplayName("타입으로만 검색하면 200과 예상한 값을 받고 서비스가 한번 호출된다.")
         void searchAllByCondition_Success_ByType() throws Exception {
             // given
-            List<String> responses = List.of();
+            List<GetVoucherResponse> responses = List.of();
             given(voucherService.searchAllByCondition(any(), any())).willReturn(responses);
 
             // when
@@ -115,7 +116,7 @@ class VoucherControllerTest {
             // given
             LocalDateTime now = LocalDateTime.now();
 
-            List<String> responses = List.of();
+            List<GetVoucherResponse> responses = List.of();
             given(voucherService.searchAllByCondition(any(), any())).willReturn(responses);
 
             // when
@@ -163,5 +164,21 @@ class VoucherControllerTest {
 
         // then
         then(voucherService).should(times(1)).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("조회 요청이 발생하면 200 응답과 함께 서비스가 한번만 호출되어야 한다.")
+    void findByIdTest() throws Exception {
+        // given
+        UUID uuid = UUID.randomUUID();
+
+        // when
+        mockMvc.perform(get(BASE_URI + "/" + uuid)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        then(voucherService).should(times(1)).findById(any());
     }
 }

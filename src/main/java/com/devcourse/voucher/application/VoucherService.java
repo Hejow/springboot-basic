@@ -2,6 +2,7 @@ package com.devcourse.voucher.application;
 
 import com.devcourse.global.exception.EntityNotFoundException;
 import com.devcourse.voucher.application.dto.CreateVoucherRequest;
+import com.devcourse.voucher.application.dto.GetVoucherResponse;
 import com.devcourse.voucher.domain.Voucher;
 import com.devcourse.voucher.domain.repository.VoucherRepository;
 import org.springframework.stereotype.Service;
@@ -33,15 +34,15 @@ public class VoucherService {
         voucherRepository.save(voucher);
     }
 
-    public List<String> findAll() {
+    public List<GetVoucherResponse> findAll() {
         return voucherRepository.findAll().stream()
-                .map(Voucher::toText)
+                .map(this::toGetResponse)
                 .toList();
     }
 
-    public List<String> searchAllByCondition(Voucher.Type type, LocalDateTime expiredAt) {
+    public List<GetVoucherResponse> searchAllByCondition(Voucher.Type type, LocalDateTime expiredAt) {
         return voucherRepository.findAllByCondition(type, expiredAt).stream()
-                .map(Voucher::toText)
+                .map(this::toGetResponse)
                 .toList();
     }
 
@@ -49,6 +50,12 @@ public class VoucherService {
     public void deleteById(UUID id) {
         validateExistVoucher(id);
         voucherRepository.deleteById(id);
+    }
+
+    public GetVoucherResponse findById(UUID id) {
+        return voucherRepository.findById(id)
+                .map(this::toGetResponse)
+                .orElseThrow(() -> new EntityNotFoundException(VOUCHER_NOT_FOUND + id));
     }
 
     private void validateExistVoucher(UUID id) {
@@ -86,5 +93,14 @@ public class VoucherService {
 
     private boolean isRateOutRange(int discountRate) {
         return MAX_DISCOUNT_RATE < discountRate;
+    }
+
+    private GetVoucherResponse toGetResponse(Voucher voucher) {
+        return new GetVoucherResponse(
+                voucher.id(),
+                voucher.discount(),
+                voucher.expireAt(),
+                voucher.type(),
+                voucher.status());
     }
 }

@@ -5,7 +5,7 @@ CREATE TABLE users
 (
     id   VARCHAR(50) PRIMARY KEY,
     name VARCHAR(30) NOT NULL
-) DEFAULT CHARACTER SET UTF8MB4;
+);
 
 CREATE TABLE vouchers
 (
@@ -14,4 +14,4 @@ CREATE TABLE vouchers
     expired_at TIMESTAMP   NOT NULL,
     type       VARCHAR(20) NOT NULL,
     status     VARCHAR(20) NOT NULL
-) DEFAULT CHARACTER SET UTF8MB4;
+);
