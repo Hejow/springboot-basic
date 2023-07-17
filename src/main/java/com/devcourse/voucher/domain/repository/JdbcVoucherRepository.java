@@ -119,4 +119,17 @@ class JdbcVoucherRepository implements VoucherRepository {
 
         jdbcTemplate.update(sql, id.toString());
     }
+
+    @Override
+    public boolean isNotExistsById(UUID id) {
+        String sql = Sql.builder()
+                .select("*")
+                .from(VOUCHERS)
+                .where("id")
+                .limit(1)
+                .build();
+
+        List<Voucher> result = jdbcTemplate.query(sql, voucherMapper, id.toString());
+        return DataAccessUtils.singleResult(result) == null;
+    }
 }

@@ -1,5 +1,6 @@
 package com.devcourse.voucher.application;
 
+import com.devcourse.global.exception.EntityNotFoundException;
 import com.devcourse.voucher.application.dto.CreateVoucherRequest;
 import com.devcourse.voucher.domain.Voucher;
 import com.devcourse.voucher.domain.repository.VoucherRepository;
@@ -14,13 +15,17 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static com.devcourse.voucher.domain.Voucher.Type.FIXED;
 import static com.devcourse.voucher.domain.Voucher.Type.PERCENT;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(SpringExtension.class)
@@ -84,5 +89,36 @@ class VoucherServiceTest {
 
         // then
         then(voucherRepository).should(times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("삭제 요청이 들어오면 repository의 메서드를 총 두번 호출한다.")
+    void deleteById_Success_Test() {
+        // given
+        UUID id = UUID.randomUUID();
+        willReturn(false).given(voucherRepository).isNotExistsById(any());
+        willDoNothing().given(voucherRepository).deleteById(any());
+
+        // when
+        voucherService.deleteById(id);
+
+        // then
+        then(voucherRepository).should(times(1)).isNotExistsById(any());
+        then(voucherRepository).should(times(1)).deleteById(any());
+    }
+    @Test
+    @DisplayName("존재하지 않는 바우처 삭제 요청이 들어오면 EntityNotFoundException을 던진다.")
+    void deleteById_Fail_ByNotExistVoucher() {
+        // given
+        UUID id = UUID.randomUUID();
+        willReturn(true).given(voucherRepository).isNotExistsById(any());
+
+        // when, then
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> voucherService.deleteById(id))
+                .withMessage("Accessing Not Exist Voucher. ID : " + id);
+
+        then(voucherRepository).should(times(1)).isNotExistsById(any());
+        then(voucherRepository).should(times(0)).deleteById(any());
     }
 }

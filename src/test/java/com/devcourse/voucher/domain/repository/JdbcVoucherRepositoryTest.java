@@ -180,6 +180,38 @@ class JdbcVoucherRepositoryTest {
         }
     }
 
+    @Nested
+    @DisplayName("존재하지 않는 바우처 확인 테스트")
+    class isNotExistsByIdTest {
+        @Test
+        @DisplayName("바우처가 존재하지 않으면 참을 리턴한다.")
+        void isNotExists_True() {
+            // given
+            UUID id = UUID.randomUUID();
+
+            // when
+            boolean shouldBeTrue = voucherRepository.isNotExistsById(id);
+
+            // then
+            assertThat(shouldBeTrue).isTrue();
+        }
+
+        @Test
+        @DisplayName("바우처가 존재하면 거짓을 리턴한다.")
+        void isNotExists_False() {
+            // given
+            Voucher voucher = new Voucher(100, LocalDateTime.now(), PERCENT);
+            Voucher saved = voucherRepository.save(voucher);
+
+            // when
+            boolean shouldBeFalse = voucherRepository.isNotExistsById(saved.id());
+
+            // then
+            assertThat(shouldBeFalse).isFalse();
+        }
+    }
+
+
     private boolean isSameDate(Voucher voucher, LocalDateTime target) {
         return voucher.expireAt().equals(target);
     }

@@ -200,6 +200,7 @@ public class Sql {
     }
 
     public static class WhereBuilder {
+        private static final String LIMIT = " LIMIT ";
         private static final String AND = " AND ";
         private static final String OR = " OR ";
 
@@ -223,6 +224,13 @@ public class Sql {
                  .append(condition)
                  .append(EQUAL)
                  .append(PARAMETER);
+
+            return this;
+        }
+
+        public WhereBuilder limit(int count) {
+            query.append(LIMIT)
+                 .append(count);
 
             return this;
         }

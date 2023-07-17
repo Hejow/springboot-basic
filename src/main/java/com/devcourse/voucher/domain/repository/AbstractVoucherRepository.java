@@ -33,4 +33,9 @@ class AbstractVoucherRepository implements VoucherRepository {
     public List<Voucher> findAllByCondition(Voucher.Type type, LocalDateTime expiredAt) {
         return null;
     }
+
+    @Override
+    public boolean isNotExistsById(UUID id) {
+        return false;
+    }
 }

@@ -21,4 +21,6 @@ public interface VoucherRepository {
     void updateStatus(UUID id, Voucher.Status status);
 
     void deleteById(UUID id);
+
+    boolean isNotExistsById(UUID id);
 }

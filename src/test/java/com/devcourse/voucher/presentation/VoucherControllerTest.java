@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static com.devcourse.voucher.domain.Voucher.Type.FIXED;
 import static com.devcourse.voucher.domain.Voucher.Type.PERCENT;
@@ -21,6 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -145,5 +147,21 @@ class VoucherControllerTest {
 
         // then
         then(voucherService).should(times(1)).create(any());
+    }
+
+    @Test
+    @DisplayName("삭제 요청이 들어오면 200 응답과 함께 서비스가 한번만 호출되어야 한다.")
+    void deleteTest() throws Exception {
+        // given
+        UUID id = UUID.randomUUID();
+
+        // when
+        mockMvc.perform(delete(BASE_URI + "/" + id)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        then(voucherService).should(times(1)).deleteById(any());
     }
 }
