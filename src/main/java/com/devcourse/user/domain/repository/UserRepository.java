@@ -1,6 +1,6 @@
-package com.devcourse.user.repository;
+package com.devcourse.user.domain.repository;
 
-import com.devcourse.user.User;
+import com.devcourse.user.domain.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

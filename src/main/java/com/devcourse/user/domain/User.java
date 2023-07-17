@@ -1,4 +1,4 @@
-package com.devcourse.user;
+package com.devcourse.user.domain;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package com.devcourse.user.repository;
+package com.devcourse.user.domain.repository;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
