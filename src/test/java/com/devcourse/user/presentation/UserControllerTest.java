@@ -2,6 +2,7 @@ package com.devcourse.user.presentation;
 
 import com.devcourse.global.exception.EntityNotFoundException;
 import com.devcourse.user.application.UserService;
+import com.devcourse.user.application.dto.GetUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -133,6 +134,49 @@ class UserControllerTest {
 
             // then
             then(userService).should(times(1)).deleteById(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("아이디 조회 테스트")
+    class findByIdTest {
+        private final UUID id = UUID.randomUUID();
+        private final String requestURI = BASE_URI + "/" + id;
+
+        @Test
+        @DisplayName("단건 조회 요청 시 200 응답과 같은 아이디와 이름을 응답 받아야 한다.")
+        void findById_Success_ByValidId() throws Exception {
+            // given
+            String name = "hejow";
+            GetUserResponse response = new GetUserResponse(id, name);
+            willReturn(response).given(userService).findById(id);
+
+            // when
+            mockMvc.perform(get(requestURI)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.payload.id").value(id.toString()))
+                    .andExpect(jsonPath("$.payload.name").value(name))
+                    .andDo(print());
+
+            // then
+            then(userService).should(times(1)).findById(any());
+        }
+
+        @Test
+        @DisplayName("없는 요청에 대해서 404 응답을 받아야 한다.")
+        void findById_Fail_ByNotExistId() throws Exception {
+            // given
+            willThrow(EntityNotFoundException.class).given(userService).findById(any());
+
+            // when
+            mockMvc.perform(get(requestURI)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andDo(print());
+
+            // then
+            then(userService).should(times(1)).findById(any());
         }
     }
 }

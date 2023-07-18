@@ -36,6 +36,13 @@ public class UserController {
     }
 
     @ResponseStatus(OK)
+    @GetMapping("/{id}")
+    public ApiResponse<GetUserResponse> findById(@PathVariable UUID id) {
+        GetUserResponse response = userService.findById(id);
+        return new ApiResponse<>(response);
+    }
+
+    @ResponseStatus(OK)
     @GetMapping("/black")
     public ApiResponse<List<String>> findAllBlack() {
         List<String> responses = userService.findAllBlack();

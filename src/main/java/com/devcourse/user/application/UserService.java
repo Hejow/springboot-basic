@@ -36,6 +36,12 @@ public class UserService {
         userRepository.save(name);
     }
 
+    public GetUserResponse findById(UUID id) {
+        return userRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND + id));
+    }
+
     public void deleteById(UUID id) {
         validateExistsUser(id);
         userRepository.deleteById(id);
