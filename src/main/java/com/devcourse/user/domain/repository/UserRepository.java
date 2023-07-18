@@ -18,4 +18,6 @@ public interface UserRepository {
     void deleteById(UUID id);
 
     void update(UUID id, String name);
+
+    boolean isNotExistsById(UUID id);
 }

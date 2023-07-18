@@ -1,9 +1,10 @@
 package com.devcourse.user.presentation;
 
+import com.devcourse.global.exception.EntityNotFoundException;
 import com.devcourse.user.application.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -11,17 +12,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.times;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -94,5 +96,43 @@ class UserControllerTest {
 
         // then
         then(userService).should(times(1)).create(any());
+    }
+
+    @Nested
+    @DisplayName("아이디로 삭제 테스트")
+    class deleteByIdTest {
+        @Test
+        @DisplayName("아이디로 삭제 요청을 하면 200 응답과 함께 서비스를 한번 호출해야 한다.")
+        void deleteById_Success_Test() throws Exception {
+            // given
+            UUID id = UUID.randomUUID();
+            willDoNothing().given(userService).deleteById(any());
+
+            // when
+            mockMvc.perform(delete(BASE_URI + "/" + id)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print());
+
+            // then
+            then(userService).should(times(1)).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("없는 아이디로 삭제 요청을 하면 404 응답을 응답을 받아야 한다.")
+        void deleteById_Fail_Test() throws Exception {
+            // given
+            UUID id = UUID.randomUUID();
+            willThrow(EntityNotFoundException.class).given(userService).deleteById(any());
+
+            // when
+            mockMvc.perform(delete(BASE_URI + "/" + id)
+                            .contentType(APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andDo(print());
+
+            // then
+            then(userService).should(times(1)).deleteById(any());
+        }
     }
 }

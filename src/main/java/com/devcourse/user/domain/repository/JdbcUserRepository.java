@@ -2,7 +2,6 @@ package com.devcourse.user.domain.repository;
 
 import com.devcourse.global.util.Sql;
 import com.devcourse.user.domain.User;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -85,5 +84,18 @@ class JdbcUserRepository implements UserRepository {
                 .build();
 
         jdbcTemplate.update(sql, name, id.toString());
+    }
+
+    @Override
+    public boolean isNotExistsById(UUID id) {
+        String sql = Sql.builder()
+                .select("*")
+                .from(USERS)
+                .where("id")
+                .limit(1)
+                .build();
+
+        List<User> result = jdbcTemplate.query(sql, userMapper, id.toString());
+        return result.isEmpty();
     }
 }

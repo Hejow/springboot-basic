@@ -4,14 +4,17 @@ import com.devcourse.global.ApiResponse;
 import com.devcourse.user.application.UserService;
 import com.devcourse.user.application.dto.GetUserResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -43,6 +46,13 @@ public class UserController {
     @PostMapping
     public ApiResponse<Void> create(@ModelAttribute String name) {
         userService.create(name);
+        return new ApiResponse<>();
+    }
+
+    @ResponseStatus(OK)
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteById(@PathVariable UUID id) {
+        userService.deleteById(id);
         return new ApiResponse<>();
     }
 }

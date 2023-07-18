@@ -1,6 +1,7 @@
 package com.devcourse.user.domain.repository;
 
 import com.devcourse.user.domain.User;
+import com.devcourse.voucher.domain.Voucher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import static com.devcourse.voucher.domain.Voucher.Type.PERCENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
@@ -121,5 +124,36 @@ class JdbcUserRepositoryTest {
         Optional<User> optionalUser = userRepository.findById(id);
         assertThat(optionalUser).isNotEmpty();
         assertThat(optionalUser.get().name()).isEqualTo(newName);
+    }
+
+    @Nested
+    @DisplayName("존재하지 않는 유저 확인 테스트")
+    class isNotExistsByIdTest {
+        @Test
+        @DisplayName("유저가 존재하지 않으면 참을 리턴한다.")
+        void isNotExists_True() {
+            // given
+            UUID id = UUID.randomUUID();
+
+            // when
+            boolean shouldBeTrue = userRepository.isNotExistsById(id);
+
+            // then
+            assertThat(shouldBeTrue).isTrue();
+        }
+
+        @Test
+        @DisplayName("유저가 존재하면 거짓을 리턴한다.")
+        void isNotExists_False() {
+            // given
+            String name = "hejow";
+            UUID id = userRepository.save(name);
+
+            // when
+            boolean shouldBeFalse = userRepository.isNotExistsById(id);
+
+            // then
+            assertThat(shouldBeFalse).isFalse();
+        }
     }
 }
