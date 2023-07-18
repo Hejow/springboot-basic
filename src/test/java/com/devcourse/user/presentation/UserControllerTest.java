@@ -27,6 +27,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -178,5 +179,24 @@ class UserControllerTest {
             // then
             then(userService).should(times(1)).findById(any());
         }
+    }
+
+    @Test
+    @DisplayName("업데이트 요청을 하면 이름을 바디로 받을 수 있고 200 응답을 해야 한다.")
+    void updateTest() throws Exception {
+        // given
+        UUID id = UUID.randomUUID();
+        String name = "hejow";
+        willDoNothing().given(userService).update(any(), any());
+
+        // when
+        mockMvc.perform(put(BASE_URI + "/" + id)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(name)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        then(userService).should(times(1)).update(any(), any());
     }
 }

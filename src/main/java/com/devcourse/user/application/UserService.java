@@ -36,6 +36,10 @@ public class UserService {
         userRepository.save(name);
     }
 
+    public void update(UUID id, String name) {
+        userRepository.update(id, name);
+    }
+
     public GetUserResponse findById(UUID id) {
         return userRepository.findById(id)
                 .map(this::toResponse)
