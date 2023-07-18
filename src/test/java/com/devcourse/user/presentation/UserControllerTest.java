@@ -1,6 +1,7 @@
 package com.devcourse.user.presentation;
 
 import com.devcourse.user.application.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,12 +14,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.times;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,5 +76,23 @@ class UserControllerTest {
 
         // then
         then(userService).should(times(1)).findAllBlack();
+    }
+
+    @Test
+    @DisplayName("이름 바디에 담아 요청을 보내면 201 응답과 함께 서비스가 한번만 호출되어야 한다.")
+    void createTest() throws Exception {
+        // given
+        String name = "hejow";
+        willDoNothing().given(userService).create(any());
+
+        // when
+        mockMvc.perform(post(BASE_URI)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(name)))
+                .andExpect(status().isCreated())
+                .andDo(print());
+
+        // then
+        then(userService).should(times(1)).create(any());
     }
 }

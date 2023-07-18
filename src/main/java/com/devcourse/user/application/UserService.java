@@ -28,6 +28,10 @@ public class UserService {
         return blackListRepository.findAllBlack();
     }
 
+    public void create(String name) {
+        userRepository.save(name);
+    }
+
     private GetUserResponse toResponse(User user) {
         return new GetUserResponse(user.id(), user.name());
     }
