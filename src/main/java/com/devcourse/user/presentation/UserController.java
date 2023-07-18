@@ -3,6 +3,8 @@ package com.devcourse.user.presentation;
 import com.devcourse.global.ApiResponse;
 import com.devcourse.user.application.UserService;
 import com.devcourse.user.application.dto.GetUserResponse;
+import com.devcourse.user.presentation.dto.NameRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,16 +55,16 @@ public class UserController {
 
     @ResponseStatus(CREATED)
     @PostMapping
-    public ApiResponse<Void> create(@ModelAttribute String name) {
-        userService.create(name);
+    public ApiResponse<Void> create(@Valid @RequestBody NameRequest request) {
+        userService.create(request.name());
         return new ApiResponse<>();
     }
 
     @ResponseStatus(OK)
     @PutMapping("/{id}")
     public ApiResponse<Void> update(@PathVariable UUID id,
-                                    @ModelAttribute String name) {
-        userService.update(id, name);
+                                    @Valid @RequestBody NameRequest request) {
+        userService.update(id, request.name());
         return new ApiResponse<>();
     }
 
